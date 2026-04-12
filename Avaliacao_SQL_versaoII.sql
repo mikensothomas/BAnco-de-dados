@@ -23,10 +23,11 @@ CREATE TABLE endereco (
 -- =========================================
 CREATE TABLE fornecedor (
     id_fornecedor INT PRIMARY KEY AUTO_INCREMENT,
-    cnpj VARCHAR(18) NOT NULL,
+    cnpj VARCHAR(18) UNIQUE NOT NULL,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_tipo_fornecedor INT NOT NULL,
     id_endereco INT NOT NULL,
+    nome_fornecedor VARCHAR(25) NOT NULL,
     FOREIGN KEY (id_tipo_fornecedor) REFERENCES tipo_fornecedor(id_tipo_fornecedor),
     FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
 );
@@ -37,10 +38,10 @@ CREATE TABLE fornecedor (
 CREATE TABLE funcionarios (
     id_funcionario INT PRIMARY KEY AUTO_INCREMENT,
     nome_funcionario VARCHAR(150) NOT NULL,
-    cpf VARCHAR(14) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
     cargo VARCHAR(100) NOT NULL,
     data_admissao DATE NOT NULL,
-    id_endereco INT,
+    id_endereco INT NOT NULL,
     FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
 );
 
@@ -78,7 +79,7 @@ CREATE TABLE produto (
 -- =========================================
 CREATE TABLE estoque (
     id_estoque INT PRIMARY KEY AUTO_INCREMENT,
-    id_produto INT NOT NULL,
+    id_produto INT UNIQUE NOT NULL,
     quantidade_disponivel INT NOT NULL,
     data_ultima_atualizacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
@@ -93,7 +94,9 @@ CREATE TABLE pedidos (
     status_do_pedido VARCHAR(50) NOT NULL,
     data_prevista_de_entrega DATETIME NOT NULL,
     id_fornecedor INT NOT NULL,
-    FOREIGN KEY (id_fornecedor) REFERENCES fornecedor(id_fornecedor)
+    id_empresa_cliente INT NOT NULL,
+    FOREIGN KEY (id_fornecedor) REFERENCES fornecedor(id_fornecedor),
+    FOREIGN KEY (id_empresa_cliente) REFERENCES empresa_cliente(id_empresa_cliente)
 );
 
 -- =========================================
@@ -106,7 +109,6 @@ CREATE TABLE item (
     id_pedido INT NOT NULL,
     id_produto INT NOT NULL,
     preco_unitario DECIMAL(10,2) NOT NULL,
-    subtotal DECIMAL(10,2),
     FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
@@ -148,34 +150,11 @@ CREATE TABLE pagamentos (
 CREATE TABLE empresa_cliente (
     id_empresa_cliente INT PRIMARY KEY AUTO_INCREMENT,
     nome_empresa VARCHAR(150) NOT NULL,
-    cnpj VARCHAR(18) NOT NULL,
+    cnpj VARCHAR(18) UNIQUE NOT NULL,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_endereco INT NOT NULL,
-    id_pedido INT NOT NULL,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco),
-    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
 );
-
--- =========================================
--- FRIMESA EMPRESA
--- =========================================
-CREATE TABLE frimesa_empresa (
-    id_frimesa INT PRIMARY KEY AUTO_INCREMENT,
-    cnpj VARCHAR(18) NOT NULL,
-    nome VARCHAR(100) NOT NULL,
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    id_categoria_fornecedor INT,
-    id_endereco INT,
-    id_funcionario INT,
-    id_fornecedor INT,
-    id_empresa_cliente INT,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco),
-    FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario),
-    FOREIGN KEY (id_fornecedor) REFERENCES fornecedor(id_fornecedor),
-    FOREIGN KEY (id_empresa_cliente) REFERENCES empresa_cliente(id_empresa_cliente)
-);
-
-
 
 -- =========================================
 -- SELECT
@@ -194,7 +173,6 @@ SELECT * FROM tipo_pagamento;
 SELECT * FROM forma_pagamento;
 SELECT * FROM pagamentos;
 SELECT * FROM empresa_cliente;
-SELECT * FROM frimesa_empresa;
 
 -- =========================================
 -- INSERT
@@ -262,12 +240,12 @@ INSERT INTO pedidos (status_do_pedido, data_prevista_de_entrega, id_fornecedor) 
 ('Pendente', NOW() + INTERVAL 5 DAY, 4),
 ('Cancelado', NOW() + INTERVAL 4 DAY, 5);
 
-INSERT INTO item (qtd_produto, id_pedido, id_produto, preco_unitario, subtotal) VALUES
-(50, 1, 1, 15.00, 750.00),
-(200, 2, 2, 4.00, 800.00),
-(100, 3, 3, 12.00, 1200.00),
-(80, 4, 4, 20.00, 1600.00),
-(60, 5, 5, 18.00, 1080.00);
+INSERT INTO item (qtd_produto, id_pedido, id_produto, preco_unitario) VALUES
+(50, 1, 1, 15.00),
+(200, 2, 2, 4.00),
+(100, 3, 3, 12.00),
+(80, 4, 4, 20.00),
+(60, 5, 5, 18.00);
 
 INSERT INTO tipo_pagamento (nome_tipo_pagamento) VALUES
 ('À vista'),
@@ -296,13 +274,6 @@ INSERT INTO empresa_cliente (nome_empresa, cnpj, id_endereco, id_pedido) VALUES
 ('Distribuidora Oeste', '33333333000103', 3, 3),
 ('Rede Mercados Brasil', '44444444000104', 4, 4),
 ('Comercial Alimentos LTDA', '55555555000105', 5, 5);
-
-INSERT INTO frimesa_empresa (cnpj, nome, id_endereco, id_funcionario, id_fornecedor, id_empresa_cliente) VALUES
-('99999999000101', 'Frimesa Matriz', 1, 1, 1, 1),
-('99999999000102', 'Frimesa Unidade Cascavel', 2, 2, 2, 2),
-('99999999000103', 'Frimesa Unidade Toledo', 3, 3, 3, 3),
-('99999999000104', 'Frimesa Unidade SC', 4, 4, 4, 4),
-('99999999000105', 'Frimesa Unidade Palotina', 5, 5, 5, 5);
 
 -- =========================================
 -- UPDATE E DELETE
@@ -348,6 +319,3 @@ DELETE FROM pagamentos WHERE id_pagamento = 5;
 
 UPDATE empresa_cliente SET nome_empresa = 'Cliente Atualizado' WHERE id_empresa_cliente = 1;
 DELETE FROM empresa_cliente WHERE id_empresa_cliente = 5;
-
-UPDATE frimesa_empresa SET nome = 'Frimesa Atualizada' WHERE id_frimesa = 1;
-DELETE FROM frimesa_empresa WHERE id_frimesa = 5;
