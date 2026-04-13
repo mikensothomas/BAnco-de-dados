@@ -1,6 +1,6 @@
 -- =========================================
 -- TIPO FORNECEDOR
--- =========================================
+-- =========================================  Foi atualizado
 CREATE TABLE tipo_fornecedor (
     id_tipo_fornecedor INT PRIMARY KEY AUTO_INCREMENT,
     nome_tipo_fornecedor VARCHAR(100) NOT NULL
