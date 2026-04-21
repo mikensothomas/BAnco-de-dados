@@ -1,26 +1,18 @@
--- =========================================
--- TIPO FORNECEDOR
--- =========================================
 CREATE TABLE tipo_fornecedor (
     id_tipo_fornecedor INT PRIMARY KEY AUTO_INCREMENT,
     nome_tipo_fornecedor VARCHAR(100) NOT NULL
 );
 
--- =========================================
--- ENDEREÇO
--- =========================================
 CREATE TABLE endereco (
     id_endereco INT PRIMARY KEY AUTO_INCREMENT,
     rua VARCHAR(150) NOT NULL,
     bairro VARCHAR(100) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
     estado VARCHAR(50) NOT NULL,
+    numero INT NOT NULL,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- =========================================
--- FORNECEDOR
--- =========================================
 CREATE TABLE fornecedor (
     id_fornecedor INT PRIMARY KEY AUTO_INCREMENT,
     cnpj VARCHAR(18) UNIQUE NOT NULL,
@@ -32,38 +24,16 @@ CREATE TABLE fornecedor (
     FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
 );
 
--- =========================================
--- FUNCIONÁRIOS
--- =========================================
-CREATE TABLE funcionarios (
-    id_funcionario INT PRIMARY KEY AUTO_INCREMENT,
-    nome_funcionario VARCHAR(150) NOT NULL,
-    cpf VARCHAR(14) UNIQUE NOT NULL,
-    cargo VARCHAR(100) NOT NULL,
-    data_admissao DATE NOT NULL,
-    id_endereco INT NOT NULL,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
-);
-
--- =========================================
--- CATEGORIA PRODUTO
--- =========================================
 CREATE TABLE categoria_produto (
     id_categoria_produto INT PRIMARY KEY AUTO_INCREMENT,
     nome_categoria VARCHAR(100) NOT NULL
 );
 
--- =========================================
--- UNIDADE DE MEDIDA
--- =========================================
 CREATE TABLE unidade_de_medida (
     id_unidade_medida INT PRIMARY KEY AUTO_INCREMENT,
     tipo_medida VARCHAR(50) NOT NULL
 );
 
--- =========================================
--- PRODUTO
--- =========================================
 CREATE TABLE produto (
     id_produto INT PRIMARY KEY AUTO_INCREMENT,
     nome_produto VARCHAR(150) NOT NULL,
@@ -74,9 +44,6 @@ CREATE TABLE produto (
     FOREIGN KEY (id_unidade_medida) REFERENCES unidade_de_medida(id_unidade_medida)
 );
 
--- =========================================
--- ESTOQUE
--- =========================================
 CREATE TABLE estoque (
     id_estoque INT PRIMARY KEY AUTO_INCREMENT,
     id_produto INT UNIQUE NOT NULL,
@@ -85,9 +52,15 @@ CREATE TABLE estoque (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
--- =========================================
--- PEDIDOS
--- =========================================
+CREATE TABLE empresa_cliente (
+    id_empresa_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nome_empresa VARCHAR(150) NOT NULL,
+    cnpj VARCHAR(18) UNIQUE NOT NULL,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_endereco INT NOT NULL,
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
+);
+
 CREATE TABLE pedidos (
     id_pedido INT PRIMARY KEY AUTO_INCREMENT,
     data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -99,9 +72,6 @@ CREATE TABLE pedidos (
     FOREIGN KEY (id_empresa_cliente) REFERENCES empresa_cliente(id_empresa_cliente)
 );
 
--- =========================================
--- ITEM
--- =========================================
 CREATE TABLE item (
     id_item INT PRIMARY KEY AUTO_INCREMENT,
     qtd_produto INT NOT NULL,
@@ -113,25 +83,16 @@ CREATE TABLE item (
     FOREIGN KEY (id_produto) REFERENCES produto(id_produto)
 );
 
--- =========================================
--- TIPO PAGAMENTO
--- =========================================
 CREATE TABLE tipo_pagamento (
     id_tipo_pagamento INT PRIMARY KEY AUTO_INCREMENT,
     nome_tipo_pagamento VARCHAR(100) NOT NULL
 );
 
--- =========================================
--- FORMA PAGAMENTO
--- =========================================
 CREATE TABLE forma_pagamento (
     id_forma_pagamento INT PRIMARY KEY AUTO_INCREMENT,
     nome_forma_pagamento VARCHAR(100) NOT NULL
 );
 
--- =========================================
--- PAGAMENTOS
--- =========================================
 CREATE TABLE pagamentos (
     id_pagamento INT PRIMARY KEY AUTO_INCREMENT,
     valor DECIMAL(10,2) NOT NULL,
@@ -144,25 +105,10 @@ CREATE TABLE pagamentos (
     FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
 );
 
--- =========================================
--- EMPRESA CLIENTE
--- =========================================
-CREATE TABLE empresa_cliente (
-    id_empresa_cliente INT PRIMARY KEY AUTO_INCREMENT,
-    nome_empresa VARCHAR(150) NOT NULL,
-    cnpj VARCHAR(18) UNIQUE NOT NULL,
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    id_endereco INT NOT NULL,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco)
-);
-
--- =========================================
 -- SELECT
--- =========================================
 SELECT * FROM tipo_fornecedor;
 SELECT * FROM endereco;
 SELECT * FROM fornecedor;
-SELECT * FROM funcionarios;
 SELECT * FROM categoria_produto;
 SELECT * FROM unidade_de_medida;
 SELECT * FROM produto;
@@ -174,9 +120,7 @@ SELECT * FROM forma_pagamento;
 SELECT * FROM pagamentos;
 SELECT * FROM empresa_cliente;
 
--- =========================================
 -- INSERT
--- =========================================
 INSERT INTO tipo_fornecedor (nome_tipo_fornecedor) VALUES
 ('Produtor de Leite'),
 ('Produtor de Suínos'),
@@ -184,26 +128,19 @@ INSERT INTO tipo_fornecedor (nome_tipo_fornecedor) VALUES
 ('Embalagens'),
 ('Transporte Logístico');
 
-INSERT INTO endereco (rua, bairro, cidade, estado) VALUES
-('Linha Industrial', 'Zona Rural', 'Medianeira', 'PR'),
-('Rodovia BR-277', 'Interior', 'Cascavel', 'PR'),
-('Estrada Rural KM 10', 'Interior', 'Toledo', 'PR'),
-('Av. Logística', 'Distrito Industrial', 'Chapecó', 'SC'),
-('Rua das Cooperativas', 'Centro', 'Palotina', 'PR');
+INSERT INTO endereco (rua, bairro, cidade, estado, numero) VALUES
+('Linha Industrial', 'Zona Rural', 'Medianeira', 'PR', 411),
+('Rodovia BR-277', 'Interior', 'Cascavel', 'PR', 45),
+('Estrada Rural KM 10', 'Interior', 'Toledo', 'PR', 566),
+('Av. Logística', 'Distrito Industrial', 'Chapecó', 'SC', 789),
+('Rua das Cooperativas', 'Centro', 'Palotina', 'PR', 543);
 
-INSERT INTO fornecedor (cnpj, id_tipo_fornecedor, id_endereco) VALUES
-('10000000000001', 1, 1),
-('20000000000002', 2, 2),
-('30000000000003', 3, 3),
-('40000000000004', 4, 4),
-('50000000000005', 5, 5);
-
-INSERT INTO funcionarios (nome_funcionario, cpf, cargo, data_admissao, id_endereco) VALUES
-('Carlos Mendes', '11111111111', 'Gerente Industrial', '2018-02-10', 1),
-('Fernanda Rocha', '22222222222', 'Engenheira de Alimentos', '2019-06-15', 2),
-('Ricardo Souza', '33333333333', 'Supervisor de Produção', '2020-03-20', 3),
-('Juliana Alves', '44444444444', 'Analista de Qualidade', '2021-08-01', 4),
-('Marcos Pereira', '55555555555', 'Operador de Máquinas', '2022-11-11', 5);
+INSERT INTO fornecedor (cnpj, id_tipo_fornecedor, id_endereco, nome_fornecedor) VALUES
+('10000000000001', 1, 1, 'BRF'),
+('20000000000002', 2, 2, 'Videplast'),
+('30000000000003', 3, 3, 'Alibem'),
+('40000000000004', 4, 4, 'MBRF'),
+('50000000000005', 5, 5, 'Master');
 
 INSERT INTO categoria_produto (nome_categoria) VALUES
 ('Carnes Suínas'),
@@ -233,12 +170,19 @@ INSERT INTO estoque (id_produto, quantidade_disponivel) VALUES
 (4, 400),
 (5, 350);
 
-INSERT INTO pedidos (status_do_pedido, data_prevista_de_entrega, id_fornecedor) VALUES
-('Processando', NOW() + INTERVAL 2 DAY, 1),
-('Enviado', NOW() + INTERVAL 3 DAY, 2),
-('Entregue', NOW() + INTERVAL 1 DAY, 3),
-('Pendente', NOW() + INTERVAL 5 DAY, 4),
-('Cancelado', NOW() + INTERVAL 4 DAY, 5);
+INSERT INTO empresa_cliente (nome_empresa, cnpj, id_endereco) VALUES
+('Supermercado Paraná', '11111111000101', 1),
+('Atacadão Sul', '22222222000102', 2),
+('Distribuidora Oeste', '33333333000103', 3),
+('Rede Mercados Brasil', '44444444000104', 4),
+('Comercial Alimentos LTDA', '55555555000105', 5);
+
+INSERT INTO pedidos (status_do_pedido, data_prevista_de_entrega, id_fornecedor, id_empresa_cliente) VALUES
+('Processando', NOW() + INTERVAL 2 DAY, 1, 1),
+('Enviado', NOW() + INTERVAL 3 DAY, 2, 2),
+('Entregue', NOW() + INTERVAL 1 DAY, 3, 3),
+('Pendente', NOW() + INTERVAL 5 DAY, 4, 4),
+('Cancelado', NOW() + INTERVAL 4 DAY, 5, 5);
 
 INSERT INTO item (qtd_produto, id_pedido, id_produto, preco_unitario) VALUES
 (50, 1, 1, 15.00),
@@ -268,16 +212,7 @@ INSERT INTO pagamentos (valor, id_forma_pagamento, id_tipo_pagamento, id_pedido)
 (1600.00, 4, 4, 4),
 (1080.00, 5, 5, 5);
 
-INSERT INTO empresa_cliente (nome_empresa, cnpj, id_endereco, id_pedido) VALUES
-('Supermercado Paraná', '11111111000101', 1, 1),
-('Atacadão Sul', '22222222000102', 2, 2),
-('Distribuidora Oeste', '33333333000103', 3, 3),
-('Rede Mercados Brasil', '44444444000104', 4, 4),
-('Comercial Alimentos LTDA', '55555555000105', 5, 5);
-
--- =========================================
 -- UPDATE E DELETE
--- =========================================
 UPDATE tipo_fornecedor SET nome_tipo_fornecedor = 'Produtor Atualizado' WHERE id_tipo_fornecedor = 1;
 DELETE FROM tipo_fornecedor WHERE id_tipo_fornecedor = 5;
 
@@ -286,9 +221,6 @@ DELETE FROM endereco WHERE id_endereco = 5;
 
 UPDATE fornecedor SET cnpj = '99999999999999' WHERE id_fornecedor = 1;
 DELETE FROM fornecedor WHERE id_fornecedor = 5;
-
-UPDATE funcionarios SET cargo = 'Gerente Geral' WHERE id_funcionario = 1;
-DELETE FROM funcionarios WHERE id_funcionario = 5;
 
 UPDATE categoria_produto SET nome_categoria = 'Carnes Premium' WHERE id_categoria_produto = 1;
 DELETE FROM categoria_produto WHERE id_categoria_produto = 5;
